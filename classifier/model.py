@@ -35,16 +35,20 @@ def test_split(df, test_size=0.7, is_imbalanced=False):
     return X_train, X_test, y_train, y_test
 
 
-def model_selection(X_train, X_test, y_train, y_test):
-    dfs = []
-
-    models = [
+def model_candidates():
+    return [
         ('LogReg', LogisticRegression()),
         ('RF', RandomForestClassifier()),
         ('KNN', KNeighborsClassifier()),
         ('GNB', GaussianNB()),
         ('XGB', XGBClassifier())
     ]
+
+
+def model_selection(X_train, X_test, y_train, y_test):
+    dfs = []
+
+    models = model_candidates()
     results = []
     names = []
     scoring = ['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted', 'roc_auc']
@@ -66,3 +70,6 @@ def model_selection(X_train, X_test, y_train, y_test):
     final = pd.concat(dfs, ignore_index=True)
     return final
 
+
+def model_predict(model, X):
+    prediction = model.predict(X)
