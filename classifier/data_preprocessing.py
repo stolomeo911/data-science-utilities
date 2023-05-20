@@ -1,19 +1,8 @@
 import pandas as pd
 import numpy as np
 import seaborn as sns
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from statsmodels.stats.outliers_influence import variance_inflation_factor
-
-
-def set_target_variable(df, target_column):
-    df["target"] = df[target_column]
-    return df
-
-
-def set_dates_columns(df, columns_dates):
-    for column_date in columns_dates:
-        df[column_date] = pd.to_datetime(df[column_date])
-    return df
 
 
 def drop_column_missing_values(df: pd.DataFrame) -> pd.DataFrame:
@@ -81,7 +70,7 @@ def select_features_from_iv(df, columns_iv, plot=True, threshold=0.02):
     if plot:
         df_iv.set_index("Variable").plot.barh(figsize=(20, 50), fontsize=16)
     feature_selected = df_iv[df_iv["IV"] > threshold].Variable
-    return feature_selected
+    return list(feature_selected.values)
 
 
 def remove_highly_correlated_variables(df, threshold=0.7, plot=True):
@@ -90,7 +79,7 @@ def remove_highly_correlated_variables(df, threshold=0.7, plot=True):
 
     # Select upper triangle of correlation matrix
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape),
-                                      k=1).astype(np.bool))
+                                      k=1).astype(np.bool_))
 
     # Find index of feature columns with correlation greater than 0.95
     to_drop = [column for column in upper.columns if any(upper[column] > threshold)]

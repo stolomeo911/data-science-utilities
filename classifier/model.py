@@ -14,11 +14,23 @@ import numpy as np
 from sklearn.utils import class_weight
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
+from imblearn.combine import SMOTEENN
+from imblearn.combine import SMOTETomek
+from imblearn.under_sampling import TomekLinks
+from imblearn.under_sampling import NearMiss
+from imblearn.over_sampling import SMOTE
 
 
-def test_split(df, test_size):
-    X_train, X_test, y_train, y_test = train_test_split(df,
-                                                        df.target,
+def test_split(df, test_size=0.7, is_imbalanced=False):
+    X = df.drop(columns='target')
+    y = df.target
+    if is_imbalanced:
+        # define oversampling strategynEA
+        over = SMOTE(sampling_strategy="minority")
+        # fit and apply the transform
+        X, y = over.fit_resample(X, y)
+    X_train, X_test, y_train, y_test = train_test_split(X,
+                                                        y,
                                                         test_size=test_size)
     return X_train, X_test, y_train, y_test
 
@@ -30,7 +42,6 @@ def model_selection(X_train, X_test, y_train, y_test):
         ('LogReg', LogisticRegression()),
         ('RF', RandomForestClassifier()),
         ('KNN', KNeighborsClassifier()),
-        ('SVM', SVC()),
         ('GNB', GaussianNB()),
         ('XGB', XGBClassifier())
     ]
