@@ -52,12 +52,17 @@ def set_numerical_variable(df, numerical_columns):
     return df
 
 
-def prepare_dataset_for_train(df, target_column, column_models,
-                              column_dates, categorical_columns,
-                              numerical_columns):
+def prepare_dataset_for_train(df, config):
+
+    target_column = config["target_column"]
+    column_models = config["model_columns"]
+    column_dates = config["columns_dates"]
+    categorical_columns = config["categorical_columns"]
+    numerical_columns = config["numerical_columns"]
+
     df = set_target_variable(df, target_column)
-    df = set_columns_models(df, column_models)
     df = set_dates_columns(df, column_dates)
     df = set_categorical_variable(df, categorical_columns)
     df = set_numerical_variable(df, numerical_columns)
+    df = set_columns_models(df, column_models + ["is_train"])
     return df

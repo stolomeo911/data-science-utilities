@@ -5,34 +5,36 @@ import pandas as pd
 from data_preparation import prepare_dataset_for_train
 from xgboost import XGBClassifier
 from model import model_candidates
+from metrics import get_classification_report
 
 
-mlflow.set_tracking_uri("https://localhost:8000/")
-
-
-def fit_survival_model(
-    train_df: pd.DataFrame,
-    target_column: str,
-    column_models: list[str],
-    column_dates: list[str],
-    numerical_columns: list[str],
-    categorical_columns: list[str],
-    columns_to_drop: list[str],
-    model_options: dict[str, Any],
-    model
+def fit_model(
+    df: pd.DataFrame,
+    model: str,
+    model_options=None,
+    output_results=True
 ):
-
-    onehot_encoders = prepare_dataset_for_train(train_df, target_column,
-                                                column_models, column_dates,
-                                                categorical_columns, numerical_columns)
-    target_df = (
-        train_df,
-        numerical_columns,
-        categorical_columns,
-        onehot_encoders,
-        columns_to_drop,
-    )
+    train_df = df[df["is_train"] == 'train']
+    X_train = train_df.drop(columns=["is_train", 'target'])
+    y_train = train_df['target']
+    test_df = df[df["is_train"] == 'test']
+    x_test = test_df.drop(columns=["is_train", 'target'])
+    y_test = test_df['target']
     models = model_candidates()
-    train_model = models[model](**model_options)
-    train_model.fit(target_df)
-    return train_model
+    if model_options:
+        train_model = models[model](**model_options)
+    else:
+        train_model = models[model]
+    train_model.fit(X_train, y_train)
+    if output_results:
+        preds = train_model.predict(x_test)
+        results = get_classification_report(y_test, preds)
+        return train_model, results
+    else:
+        return train_model
+
+
+def model_predict(train_model, X):
+    prediction = train_model.predict(X)
+
+
